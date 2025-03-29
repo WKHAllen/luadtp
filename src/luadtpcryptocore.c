@@ -864,9 +864,20 @@ unsigned long get_openssl_error(void)
     return ERR_get_error();
 }
 
+#include <stdio.h>
+
 static int l_rsa_key_pair_new(lua_State *L)
 {
+    printf("l_rsa_key_pair_new\n");
     rsa_key_pair_t *key_pair = rsa_key_pair_new();
+    printf("Public key size: %d\n", (int)(key_pair->public_key->key_size));
+    for (size_t i = 0; i < key_pair->public_key->key_size; i++)
+        printf("%c", key_pair->public_key->key[i]);
+    printf("\n");
+    printf("Private key size: %d\n", (int)(key_pair->private_key->key_size));
+    for (size_t i = 0; i < key_pair->private_key->key_size; i++)
+        printf("%c", key_pair->private_key->key[i]);
+    printf("\n");
 
     if (key_pair == NULL)
     {
@@ -882,8 +893,6 @@ static int l_rsa_key_pair_new(lua_State *L)
 
     return 2;
 }
-
-#include <stdio.h>
 
 static int l_rsa_encrypt(lua_State *L)
 {
