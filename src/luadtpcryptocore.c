@@ -887,6 +887,7 @@ static int l_rsa_key_pair_new(lua_State *L)
 
 static int l_rsa_encrypt(lua_State *L)
 {
+    printf("l_rsa_encrypt\n");
     rsa_public_key_t public_key;
     public_key.key = (char *)luaL_checklstring(L, 1, &(public_key.key_size));
     printf("Public key size: %d\n", (int)(public_key.key_size));
