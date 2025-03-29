@@ -883,13 +883,27 @@ static int l_rsa_key_pair_new(lua_State *L)
     return 2;
 }
 
+#include <stdio.h>
+
 static int l_rsa_encrypt(lua_State *L)
 {
     rsa_public_key_t public_key;
     public_key.key = (char *)luaL_checklstring(L, 1, &(public_key.key_size));
+    printf("Public key size: %d\n", (int)(public_key.key_size));
+    for (size_t i = 0; i < public_key.key_size; i++)
+        printf("%c", public_key.key[i]);
+    printf("\n");
     size_t plaintext_size;
     void *plaintext = (void *)luaL_checklstring(L, 2, &plaintext_size);
+    printf("Plaintext size: %d\n", (int)(plaintext_size));
+    for (size_t i = 0; i < plaintext_size; i++)
+        printf("%c", ((char *)(plaintext))[i]);
+    printf("\n");
     crypto_data_t *ciphertext = rsa_encrypt(&public_key, plaintext, plaintext_size);
+    printf("Ciphertext size: %d\n", (int)(ciphertext->data_size));
+    for (size_t i = 0; i < ciphertext->data_size; i++)
+        printf("%c", ((char *)(ciphertext->data))[i]);
+    printf("\n");
 
     if (ciphertext == NULL)
     {
