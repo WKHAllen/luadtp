@@ -1,5 +1,7 @@
 /luarocks.bat
 /lua.bat
+/luarocks
+/lua
 /lua_modules
 /luadtp
 /.luarocks

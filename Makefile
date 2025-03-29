@@ -1,16 +1,20 @@
 .PHONY: all build test
 
-# Without an assignment here, `CLEAN_OBJECTS` is not set. Please explain.
-_ = _
+CI = false
 
 ifeq ($(OS),Windows_NT)
 	LUA = lua.bat
 	LUAROCKS = luarocks.bat
 	CLEAN_OBJECTS = del src\*.o
 else
+	LUA = ./lua
+	LUAROCKS = ./luarocks
+	CLEAN_OBJECTS = rm -f src/*.o
+endif
+
+ifeq ($(CI),true)
 	LUA = lua
 	LUAROCKS = luarocks
-	CLEAN_OBJECTS = rm -f src/*.o
 endif
 
 BUILD_FLAGS = $(PLAT_BUILD_FLAGS) -fPIC -std=gnu11

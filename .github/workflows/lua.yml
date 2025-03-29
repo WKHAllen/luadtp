@@ -14,8 +14,8 @@ jobs:
       - uses: leafo/gh-actions-lua@v11
       - uses: leafo/gh-actions-luarocks@v5
 
-      - name: make build
-        run: make build
+      - name: Build
+        run: make build CI=true
 
-      - name: make test
-        run: make test
+      - name: Test
+        run: make test CI=true
