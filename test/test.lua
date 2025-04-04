@@ -2,11 +2,8 @@ local luadtp = require("luadtp")
 
 local function testCrypto()
   local rsaMessage = "Hello, RSA!"
-  print("Generating RSA key pair...")
   local publicKey, privateKey = luadtp.crypto.newRsaKeyPair()
-  print("Performing RSA encryption...")
   local rsaEncrypted = luadtp.crypto.rsaEncrypt(publicKey, rsaMessage)
-  print("Performing RSA decryption...")
   local rsaDecrypted = luadtp.crypto.rsaDecrypt(privateKey, rsaEncrypted)
   print("Original string:  '" .. rsaMessage .. "'")
   print("Encrypted string: '" .. rsaEncrypted .. "'")
@@ -15,11 +12,8 @@ local function testCrypto()
   assert(rsaEncrypted ~= rsaMessage)
 
   local aesMessage = "Hello, AES!"
-  print("Generating AES key...")
   local key = luadtp.crypto.newAesKey()
-  print("Performing AES encryption...")
   local aesEncrypted = luadtp.crypto.aesEncrypt(key, aesMessage)
-  print("Performing AES decryption...")
   local aesDecrypted = luadtp.crypto.aesDecrypt(key, aesEncrypted)
   print("Original string:  '" .. aesMessage .. "'")
   print("Encrypted string: '" .. aesEncrypted .. "'")
