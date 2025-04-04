@@ -864,23 +864,9 @@ unsigned long get_openssl_error(void)
     return ERR_get_error();
 }
 
-#include <stdio.h>
-
 static int l_rsa_key_pair_new(lua_State *L)
 {
-    printf("l_rsa_key_pair_new\n");
-    fflush(stdout);
     rsa_key_pair_t *key_pair = rsa_key_pair_new();
-    printf("Public key size: %d\n", (int)(key_pair->public_key->key_size));
-    for (size_t i = 0; i < key_pair->public_key->key_size; i++)
-        printf("%c", key_pair->public_key->key[i]);
-    printf("\n");
-    fflush(stdout);
-    printf("Private key size: %d\n", (int)(key_pair->private_key->key_size));
-    for (size_t i = 0; i < key_pair->private_key->key_size; i++)
-        printf("%c", key_pair->private_key->key[i]);
-    printf("\n");
-    fflush(stdout);
 
     if (key_pair == NULL)
     {
@@ -899,28 +885,11 @@ static int l_rsa_key_pair_new(lua_State *L)
 
 static int l_rsa_encrypt(lua_State *L)
 {
-    printf("<l_rsa_encrypt>\n");
-    fflush(stdout);
     rsa_public_key_t public_key;
     public_key.key = (char *)luaL_checklstring(L, 1, &(public_key.key_size));
-    printf("Public key size: %d\n", (int)(public_key.key_size));
-    for (size_t i = 0; i < public_key.key_size; i++)
-        printf("%c", public_key.key[i]);
-    printf("\n");
-    fflush(stdout);
     size_t plaintext_size;
     void *plaintext = (void *)luaL_checklstring(L, 2, &plaintext_size);
-    printf("Plaintext size: %d\n", (int)(plaintext_size));
-    for (size_t i = 0; i < plaintext_size; i++)
-        printf("%c", ((char *)(plaintext))[i]);
-    printf("\n");
-    fflush(stdout);
     crypto_data_t *ciphertext = rsa_encrypt(&public_key, plaintext, plaintext_size);
-    printf("Ciphertext size: %d\n", (int)(ciphertext->data_size));
-    for (size_t i = 0; i < ciphertext->data_size; i++)
-        printf("%c", ((char *)(ciphertext->data))[i]);
-    printf("\n");
-    fflush(stdout);
 
     if (ciphertext == NULL)
     {
@@ -931,7 +900,6 @@ static int l_rsa_encrypt(lua_State *L)
         lua_pushlstring(L, (const char *)(ciphertext->data), ciphertext->data_size);
         crypto_data_free(ciphertext);
     }
-    printf("</l_rsa_encrypt>\n");
 
     return 1;
 }
