@@ -899,7 +899,7 @@ static int l_rsa_key_pair_new(lua_State *L)
 
 static int l_rsa_encrypt(lua_State *L)
 {
-    printf("l_rsa_encrypt\n");
+    printf("<l_rsa_encrypt>\n");
     fflush(stdout);
     rsa_public_key_t public_key;
     public_key.key = (char *)luaL_checklstring(L, 1, &(public_key.key_size));
@@ -931,6 +931,7 @@ static int l_rsa_encrypt(lua_State *L)
         lua_pushlstring(L, (const char *)(ciphertext->data), ciphertext->data_size);
         crypto_data_free(ciphertext);
     }
+    printf("</l_rsa_encrypt>\n");
 
     return 1;
 }
