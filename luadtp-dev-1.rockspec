@@ -9,7 +9,8 @@ description = {
    license = "MIT"
 }
 dependencies = {
-   "lua >= 5.1"
+   "lua >= 5.1",
+   "binser == 0.0-8"
 }
 
 local function make_platform(platform)
