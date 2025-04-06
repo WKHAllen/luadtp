@@ -1,5 +1,15 @@
-local crypto = require("luadtp.crypto")
+local clientImpl = require("luadtp.client")
+local serverImpl = require("luadtp.server")
+
+local function client()
+  return clientImpl.Client:new()
+end
+
+local function server()
+  return serverImpl.Server:new()
+end
 
 return {
-  crypto = crypto
+  client = client,
+  server = server,
 }

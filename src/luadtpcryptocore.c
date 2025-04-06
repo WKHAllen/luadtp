@@ -137,7 +137,7 @@ unsigned char *encode_message_size(size_t size)
 
     for (int i = LENSIZE - 1; i >= 0; i--)
     {
-        encoded_size[i] = size % 256;
+        encoded_size[i] = size & 0xff;
         size = size >> 8;
     }
 
@@ -864,6 +864,24 @@ unsigned long get_openssl_error(void)
     return ERR_get_error();
 }
 
+static int l_encode_message_size(lua_State *L)
+{
+    size_t size = luaL_checkinteger(L, 1);
+    unsigned char *encoded_size = encode_message_size(size);
+    lua_pushlstring(L, (const char *)encoded_size, LENSIZE);
+    free(encoded_size);
+    return 1;
+}
+
+static int l_decode_message_size(lua_State *L)
+{
+    size_t encoded_size_len;
+    unsigned char *encoded_size = (unsigned char *)luaL_checklstring(L, 1, &encoded_size_len);
+    size_t decoded_size = decode_message_size(encoded_size);
+    lua_pushinteger(L, decoded_size);
+    return 1;
+}
+
 static int l_rsa_key_pair_new(lua_State *L)
 {
     rsa_key_pair_t *key_pair = rsa_key_pair_new();
@@ -992,6 +1010,8 @@ static int l_get_openssl_error(lua_State *L)
 }
 
 static const struct luaL_Reg luadtpcryptocorelib[] = {
+    {"encode_message_size", l_encode_message_size},
+    {"decode_message_size", l_decode_message_size},
     {"rsa_key_pair_new", l_rsa_key_pair_new},
     {"rsa_encrypt", l_rsa_encrypt},
     {"rsa_decrypt", l_rsa_decrypt},

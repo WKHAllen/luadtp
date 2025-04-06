@@ -28,7 +28,10 @@ local function make_platform(platform)
          },
          libraries = libraries
       },
+      ["luadtp.util"] = "src/util.lua",
       ["luadtp.crypto"] = "src/crypto.lua",
+      ["luadtp.client"] = "src/client.lua",
+      ["luadtp.server"] = "src/server.lua",
       luadtp = "src/luadtp.lua"
    }
 
