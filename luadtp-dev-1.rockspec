@@ -10,6 +10,7 @@ description = {
 }
 dependencies = {
    "lua >= 5.1",
+   "luasocket >= 3.1.0",
    "binser == 0.0-8"
 }
 
