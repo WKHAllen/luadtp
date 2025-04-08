@@ -21,7 +21,7 @@ COMPILER_FLAGS = \
 	-std=gnu11 -pedantic -Wall \
 	-Wno-missing-braces -Wextra -Wno-missing-field-initializers -Wformat=2 \
 	-Wswitch-default -Wswitch-enum -Wcast-align -Wpointer-arith \
-	-Wbad-function-cast -Wstrict-overflow=5 -Wstrict-prototypes -Winline \
+	-Wstrict-overflow=5 -Wstrict-prototypes -Winline \
 	-Wundef -Wnested-externs -Wshadow -Wunreachable-code \
 	-Wlogical-op -Wfloat-equal -Wstrict-aliasing=2 -Wredundant-decls \
 	-Wold-style-definition -Wno-pedantic-ms-format -Werror \
