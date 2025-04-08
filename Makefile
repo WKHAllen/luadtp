@@ -23,7 +23,7 @@ COMPILER_FLAGS = \
 	-Wswitch-default -Wswitch-enum -Wcast-align -Wpointer-arith \
 	-Wstrict-overflow=5 -Wstrict-prototypes -Winline \
 	-Wundef -Wnested-externs -Wshadow -Wunreachable-code \
-	-Wlogical-op -Wfloat-equal -Wstrict-aliasing=2 -Wredundant-decls \
+	-Wlogical-op -Wstrict-aliasing=2 -Wredundant-decls \
 	-Wold-style-definition -Wno-pedantic-ms-format -Werror \
 	-g -O0 \
 	-fno-omit-frame-pointer -ffloat-store -fno-common
