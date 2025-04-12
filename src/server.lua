@@ -89,7 +89,7 @@ function Server.new()
     _isServing = false,
     _sock = nil,
     _clients = {},
-    _nextClientId = 0,
+    _nextClientId = 1,
   }, Server)
 
   return server
@@ -132,7 +132,7 @@ function Server:stop()
 end
 
 function Server:send(data, clientId, ...)
-  local clientIds = arg
+  local clientIds = {...}
   table.insert(clientIds, 1, clientId)
   local dataSerialized = util.serialize(data)
 
@@ -155,7 +155,7 @@ end
 function Server:sendAll(data)
   local clientIds = {}
 
-  for _, clientId in ipairs(self._clients) do
+  for clientId, _ in ipairs(self._clients) do
     table.insert(clientIds, clientId)
   end
 

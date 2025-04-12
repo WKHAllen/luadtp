@@ -36,4 +36,4 @@ build:
 	$(LUAROCKS) build CC=gcc LD=gcc CFLAGS="$(BUILD_FLAGS)" LDFLAGS="$(LINK_FLAGS)" && $(CLEAN_OBJECTS)
 
 test:
-	$(LUA) test/test.lua
+	./test.sh "$(LUA)"

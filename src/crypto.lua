@@ -60,6 +60,10 @@ local function aesDecrypt(key, ciphertext)
   return plaintext
 end
 
+local function sleep(seconds)
+  crypto.sleep(seconds)
+end
+
 return {
   newRsaKeyPair = newRsaKeyPair,
   rsaEncrypt = rsaEncrypt,
@@ -67,4 +71,5 @@ return {
   newAesKey = newAesKey,
   aesEncrypt = aesEncrypt,
   aesDecrypt = aesDecrypt,
+  sleep = sleep,
 }

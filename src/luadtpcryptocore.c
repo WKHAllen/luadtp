@@ -5,6 +5,12 @@
 #include <stdlib.h>
 #include <string.h>
 
+#ifdef _WIN32
+#include <Windows.h>
+#else
+#include <time.h>
+#endif
+
 #define BIO void
 #define BIO_METHOD void
 #define EVP_PKEY void
@@ -1009,6 +1015,22 @@ static int l_get_openssl_error(lua_State *L)
     return 1;
 }
 
+static int l_sleep(lua_State *L)
+{
+    double seconds = luaL_checknumber(L, 1);
+
+#ifdef _WIN32
+    Sleep(seconds * 1000);
+#else
+    struct timespec ts;
+    ts.tv_sec = seconds;
+    ts.tv_nsec = ((int)(seconds * 1000) % 1000) * 1000000;
+    nanosleep(&ts, NULL);
+#endif
+
+    return 0;
+}
+
 static const struct luaL_Reg luadtpcryptocorelib[] = {
     {"encode_message_size", l_encode_message_size},
     {"decode_message_size", l_decode_message_size},
@@ -1019,6 +1041,7 @@ static const struct luaL_Reg luadtpcryptocorelib[] = {
     {"aes_encrypt", l_aes_encrypt},
     {"aes_decrypt", l_aes_decrypt},
     {"get_openssl_error", l_get_openssl_error},
+    {"sleep", l_sleep},
     {NULL, NULL}};
 
 LUADTPCRYPTOCORE_API int luaopen_luadtp_cryptocore(lua_State *L)
