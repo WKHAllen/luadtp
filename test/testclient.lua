@@ -105,15 +105,63 @@ local function testSend()
 end
 
 local function testLargeSend()
-  -- TODO
+  crypto.sleep(0.1)
+
+  testutils.randomSeed(testutils.portLargeSend)
+  local messageFromServer = testutils.randomBytes(math.random(32768, 65535))
+  local messageFromClient = testutils.randomBytes(math.random(16384, 32767))
+
+  local client = luadtp.client()
+  local co = client:connect(testutils.host, testutils.portLargeSend)
+  print("Client address: ", client:getAddr())
+
+  crypto.sleep(0.1)
+  client:send(messageFromClient)
+  testutils.pollUntilNotNillValue(co, { eventType = "receive", data = messageFromServer })
+
+  crypto.sleep(0.1)
+  client:disconnect()
+  testutils.pollEnd(co)
 end
 
 local function testSendingNumerousMessages()
-  -- TODO
+  crypto.sleep(0.1)
+
+  testutils.randomSeed(testutils.portSendingNumerousMessages)
+  local messagesFromServer = testutils.randomNumbers(math.random(64, 127), 0, 65535)
+  local messagesFromClient = testutils.randomNumbers(math.random(128, 255), 0, 65535)
+
+  local client = luadtp.client()
+  local co = client:connect(testutils.host, testutils.portSendingNumerousMessages)
+  print("Client address: ", client:getAddr())
+
+  crypto.sleep(0.1)
+  for _, clientMessage in ipairs(messagesFromClient) do
+    client:send(clientMessage)
+  end
+  for _, serverMessage in ipairs(messagesFromServer) do
+    testutils.pollUntilNotNillValue(co, { eventType = "receive", data = serverMessage })
+  end
+
+  crypto.sleep(0.1)
+  client:disconnect()
+  testutils.pollEnd(co)
 end
 
 local function testSendingCustomTypes()
-  -- TODO
+  crypto.sleep(0.1)
+
+  local client = luadtp.client()
+  local co = client:connect(testutils.host, testutils.portSendingCustomTypes)
+  print("Client address: ", client:getAddr())
+
+  crypto.sleep(0.1)
+  client:send(testutils.sendingCustomTypesMessageFromClient)
+  testutils.pollUntilNotNillValue(co, { eventType = "receive", data = testutils.sendingCustomTypesMessageFromServer })
+
+  crypto.sleep(0.1)
+  client:disconnect()
+  testutils.pollEnd(co)
 end
 
 local function testMultipleClients()
@@ -125,6 +173,14 @@ local function testRemoveClient()
 end
 
 local function testStopServerWhileClientConnected()
+  -- TODO
+end
+
+local function testClientCleanupOnGC()
+  -- TODO
+end
+
+local function testServerCleanupOnGC()
   -- TODO
 end
 
@@ -159,6 +215,10 @@ local function test()
   testRemoveClient()
   print("Testing stopping a server while a client is connected...")
   testStopServerWhileClientConnected()
+  print("Testing that client resources are cleaned up when garbage collected...")
+  testClientCleanupOnGC()
+  print("Testing that server resources are cleaned up when garbage collected...")
+  testServerCleanupOnGC()
   print("Testing the README example...")
   testExample()
 

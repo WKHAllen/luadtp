@@ -140,6 +140,30 @@ local function pollUntilNotNillValue(co, value)
   assertEq(res, value)
 end
 
+local function randomSeed(seed)
+  math.randomseed(seed)
+end
+
+local function randomBytes(size)
+  local bytes = ""
+
+  for _ = 1, size do
+    bytes = bytes .. string.char(math.random(0, 255))
+  end
+
+  return bytes
+end
+
+local function randomNumbers(size, min, max)
+  local nums = {}
+
+  for _ = 1, size do
+    table.insert(nums, math.random(min, max))
+  end
+
+  return nums
+end
+
 return {
   host = "127.0.0.1",
   portServerServing = 33001,
@@ -151,9 +175,13 @@ return {
   portMultipleClients = 33007,
   portRemoveClient = 33008,
   portStopServerWhileClientConnected = 33009,
-  portExample = 33010,
+  portClientCleanupOnGC = 33010,
+  portServerCleanupOnGC = 33011,
+  portExample = 33012,
   sendMessageFromServer = 29275,
   sendMessageFromClient = "Hello, server!",
+  sendingCustomTypesMessageFromServer = { a = 123, b = "Hello, custom server type!", c = { "first server item", "second server item" } },
+  sendingCustomTypesMessageFromClient = { a = 456, b = "Hello, custom client type!", c = { "#1 client item", "client item #2", "(3) client item" } },
   print_r = print_r,
   equals = equals,
   assertEq = assertEq,
@@ -164,4 +192,7 @@ return {
   pollUntil = pollUntil,
   pollUntilNotNill = pollUntilNotNill,
   pollUntilNotNillValue = pollUntilNotNillValue,
+  randomSeed = randomSeed,
+  randomBytes = randomBytes,
+  randomNumbers = randomNumbers,
 }

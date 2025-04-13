@@ -44,15 +44,57 @@ local function testSend()
 end
 
 local function testLargeSend()
-  -- TODO
+  testutils.randomSeed(testutils.portLargeSend)
+  local messageFromServer = testutils.randomBytes(math.random(32768, 65535))
+  local messageFromClient = testutils.randomBytes(math.random(16384, 32767))
+
+  local server = luadtp.server()
+  local co = server:start(testutils.host, testutils.portLargeSend)
+  print("Server address: ", server:getAddr())
+  testutils.pollUntil(co, { eventType = "connect", clientId = 1 })
+
+  server:sendAll(messageFromServer)
+  testutils.pollUntilNotNillValue(co, { eventType = "receive", clientId = 1, data = messageFromClient })
+
+  testutils.pollUntil(co, { eventType = "disconnect", clientId = 1 })
+  server:stop()
+  testutils.pollEnd(co)
 end
 
 local function testSendingNumerousMessages()
-  -- TODO
+  testutils.randomSeed(testutils.portSendingNumerousMessages)
+  local messagesFromServer = testutils.randomNumbers(math.random(64, 127), 0, 65535)
+  local messagesFromClient = testutils.randomNumbers(math.random(128, 255), 0, 65535)
+
+  local server = luadtp.server()
+  local co = server:start(testutils.host, testutils.portSendingNumerousMessages)
+  print("Server address: ", server:getAddr())
+  testutils.pollUntil(co, { eventType = "connect", clientId = 1 })
+
+  for _, serverMessage in ipairs(messagesFromServer) do
+    server:sendAll(serverMessage)
+  end
+  for _, clientMessage in ipairs(messagesFromClient) do
+    testutils.pollUntilNotNillValue(co, { eventType = "receive", clientId = 1, data = clientMessage })
+  end
+
+  testutils.pollUntil(co, { eventType = "disconnect", clientId = 1 })
+  server:stop()
+  testutils.pollEnd(co)
 end
 
 local function testSendingCustomTypes()
-  -- TODO
+  local server = luadtp.server()
+  local co = server:start(testutils.host, testutils.portSendingCustomTypes)
+  print("Server address: ", server:getAddr())
+  testutils.pollUntil(co, { eventType = "connect", clientId = 1 })
+
+  server:sendAll(testutils.sendingCustomTypesMessageFromServer)
+  testutils.pollUntilNotNillValue(co, { eventType = "receive", clientId = 1, data = testutils.sendingCustomTypesMessageFromClient })
+
+  testutils.pollUntil(co, { eventType = "disconnect", clientId = 1 })
+  server:stop()
+  testutils.pollEnd(co)
 end
 
 local function testMultipleClients()
@@ -64,6 +106,14 @@ local function testRemoveClient()
 end
 
 local function testStopServerWhileClientConnected()
+  -- TODO
+end
+
+local function testClientCleanupOnGC()
+  -- TODO
+end
+
+local function testServerCleanupOnGC()
   -- TODO
 end
 
@@ -92,6 +142,10 @@ local function test()
   testRemoveClient()
   print("Testing stopping a server while a client is connected...")
   testStopServerWhileClientConnected()
+  print("Testing that client resources are cleaned up when garbage collected...")
+  testClientCleanupOnGC()
+  print("Testing that server resources are cleaned up when garbage collected...")
+  testServerCleanupOnGC()
   print("Testing the README example...")
   testExample()
 
