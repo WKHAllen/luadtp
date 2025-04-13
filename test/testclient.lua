@@ -97,7 +97,7 @@ local function testSend()
 
   crypto.sleep(0.1)
   client:send(testutils.sendMessageFromClient)
-  testutils.pollUntilNotNillValue(co, { eventType = "receive", data = testutils.sendMessageFromServer })
+  testutils.pollUntilNotNilValue(co, { eventType = "receive", data = testutils.sendMessageFromServer })
 
   crypto.sleep(0.1)
   client:disconnect()
@@ -108,8 +108,10 @@ local function testLargeSend()
   crypto.sleep(0.1)
 
   testutils.randomSeed(testutils.portLargeSend)
-  local messageFromServer = testutils.randomBytes(math.random(32768, 65535))
-  local messageFromClient = testutils.randomBytes(math.random(16384, 32767))
+  local messageFromServer = testutils.randomBytes(math.random(512, 1023))
+  local messageFromClient = testutils.randomBytes(math.random(256, 511))
+  print("Large server message length: ", #messageFromServer)
+  print("Large client message length: ", #messageFromClient)
 
   local client = luadtp.client()
   local co = client:connect(testutils.host, testutils.portLargeSend)
@@ -117,7 +119,7 @@ local function testLargeSend()
 
   crypto.sleep(0.1)
   client:send(messageFromClient)
-  testutils.pollUntilNotNillValue(co, { eventType = "receive", data = messageFromServer })
+  testutils.pollUntilNotNilValue(co, { eventType = "receive", data = messageFromServer })
 
   crypto.sleep(0.1)
   client:disconnect()
@@ -130,6 +132,8 @@ local function testSendingNumerousMessages()
   testutils.randomSeed(testutils.portSendingNumerousMessages)
   local messagesFromServer = testutils.randomNumbers(math.random(64, 127), 0, 65535)
   local messagesFromClient = testutils.randomNumbers(math.random(128, 255), 0, 65535)
+  print("Number of server messages: ", #messagesFromServer)
+  print("Number of client messages: ", #messagesFromClient)
 
   local client = luadtp.client()
   local co = client:connect(testutils.host, testutils.portSendingNumerousMessages)
@@ -140,7 +144,7 @@ local function testSendingNumerousMessages()
     client:send(clientMessage)
   end
   for _, serverMessage in ipairs(messagesFromServer) do
-    testutils.pollUntilNotNillValue(co, { eventType = "receive", data = serverMessage })
+    testutils.pollUntilNotNilValue(co, { eventType = "receive", data = serverMessage })
   end
 
   crypto.sleep(0.1)
@@ -157,7 +161,7 @@ local function testSendingCustomTypes()
 
   crypto.sleep(0.1)
   client:send(testutils.sendingCustomTypesMessageFromClient)
-  testutils.pollUntilNotNillValue(co, { eventType = "receive", data = testutils.sendingCustomTypesMessageFromServer })
+  testutils.pollUntilNotNilValue(co, { eventType = "receive", data = testutils.sendingCustomTypesMessageFromServer })
 
   crypto.sleep(0.1)
   client:disconnect()

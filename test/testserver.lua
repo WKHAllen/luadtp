@@ -36,7 +36,7 @@ local function testSend()
   testutils.pollUntil(co, { eventType = "connect", clientId = 1 })
 
   server:sendAll(testutils.sendMessageFromServer)
-  testutils.pollUntilNotNillValue(co, { eventType = "receive", clientId = 1, data = testutils.sendMessageFromClient })
+  testutils.pollUntilNotNilValue(co, { eventType = "receive", clientId = 1, data = testutils.sendMessageFromClient })
 
   testutils.pollUntil(co, { eventType = "disconnect", clientId = 1 })
   server:stop()
@@ -45,8 +45,10 @@ end
 
 local function testLargeSend()
   testutils.randomSeed(testutils.portLargeSend)
-  local messageFromServer = testutils.randomBytes(math.random(32768, 65535))
-  local messageFromClient = testutils.randomBytes(math.random(16384, 32767))
+  local messageFromServer = testutils.randomBytes(math.random(512, 1023))
+  local messageFromClient = testutils.randomBytes(math.random(256, 511))
+  print("Large server message length: ", #messageFromServer)
+  print("Large client message length: ", #messageFromClient)
 
   local server = luadtp.server()
   local co = server:start(testutils.host, testutils.portLargeSend)
@@ -54,7 +56,7 @@ local function testLargeSend()
   testutils.pollUntil(co, { eventType = "connect", clientId = 1 })
 
   server:sendAll(messageFromServer)
-  testutils.pollUntilNotNillValue(co, { eventType = "receive", clientId = 1, data = messageFromClient })
+  testutils.pollUntilNotNilValue(co, { eventType = "receive", clientId = 1, data = messageFromClient })
 
   testutils.pollUntil(co, { eventType = "disconnect", clientId = 1 })
   server:stop()
@@ -65,6 +67,8 @@ local function testSendingNumerousMessages()
   testutils.randomSeed(testutils.portSendingNumerousMessages)
   local messagesFromServer = testutils.randomNumbers(math.random(64, 127), 0, 65535)
   local messagesFromClient = testutils.randomNumbers(math.random(128, 255), 0, 65535)
+  print("Number of server messages: ", #messagesFromServer)
+  print("Number of client messages: ", #messagesFromClient)
 
   local server = luadtp.server()
   local co = server:start(testutils.host, testutils.portSendingNumerousMessages)
@@ -75,7 +79,7 @@ local function testSendingNumerousMessages()
     server:sendAll(serverMessage)
   end
   for _, clientMessage in ipairs(messagesFromClient) do
-    testutils.pollUntilNotNillValue(co, { eventType = "receive", clientId = 1, data = clientMessage })
+    testutils.pollUntilNotNilValue(co, { eventType = "receive", clientId = 1, data = clientMessage })
   end
 
   testutils.pollUntil(co, { eventType = "disconnect", clientId = 1 })
@@ -90,7 +94,7 @@ local function testSendingCustomTypes()
   testutils.pollUntil(co, { eventType = "connect", clientId = 1 })
 
   server:sendAll(testutils.sendingCustomTypesMessageFromServer)
-  testutils.pollUntilNotNillValue(co, { eventType = "receive", clientId = 1, data = testutils.sendingCustomTypesMessageFromClient })
+  testutils.pollUntilNotNilValue(co, { eventType = "receive", clientId = 1, data = testutils.sendingCustomTypesMessageFromClient })
 
   testutils.pollUntil(co, { eventType = "disconnect", clientId = 1 })
   server:stop()

@@ -124,7 +124,7 @@ local function pollUntil(co, value)
   end
 end
 
-local function pollUntilNotNill(co)
+local function pollUntilNotNil(co)
   while true do
     local success, res = coroutine.resume(co)
     assert(success)
@@ -135,8 +135,8 @@ local function pollUntilNotNill(co)
   end
 end
 
-local function pollUntilNotNillValue(co, value)
-  local res = pollUntilNotNill(co)
+local function pollUntilNotNilValue(co, value)
+  local res = pollUntilNotNil(co)
   assertEq(res, value)
 end
 
@@ -190,8 +190,8 @@ return {
   pollNil = pollNil,
   pollEnd = pollEnd,
   pollUntil = pollUntil,
-  pollUntilNotNill = pollUntilNotNill,
-  pollUntilNotNillValue = pollUntilNotNillValue,
+  pollUntilNotNil = pollUntilNotNil,
+  pollUntilNotNilValue = pollUntilNotNilValue,
   randomSeed = randomSeed,
   randomBytes = randomBytes,
   randomNumbers = randomNumbers,
