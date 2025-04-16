@@ -169,23 +169,88 @@ local function testSendingCustomTypes()
 end
 
 local function testMultipleClients()
-  -- TODO
+  crypto.sleep(0.1)
+
+  local client1 = luadtp.client()
+  local co1 = client1:connect(testutils.host, testutils.portMultipleClients)
+  print("Client 1 address: ", client1:getAddr())
+
+  local client2 = luadtp.client()
+  local co2 = client2:connect(testutils.host, testutils.portMultipleClients)
+  print("Client 2 address: ", client2:getAddr())
+
+  crypto.sleep(0.1)
+  client1:send(testutils.multipleClientsMessageFromClient1)
+  client2:send(testutils.multipleClientsMessageFromClient2)
+
+  testutils.pollUntilNotNilValue(co1, { eventType = "receive", data = #testutils.multipleClientsMessageFromClient1 })
+  testutils.pollUntilNotNilValue(co2, { eventType = "receive", data = #testutils.multipleClientsMessageFromClient2 })
+
+  testutils.pollUntilNotNilValue(co1, { eventType = "receive", data = testutils.multipleClientsMessageFromServer })
+  testutils.pollUntilNotNilValue(co2, { eventType = "receive", data = testutils.multipleClientsMessageFromServer })
+
+  crypto.sleep(0.1)
+  client1:disconnect()
+  crypto.sleep(0.1)
+  client2:disconnect()
+  testutils.pollEnd(co1)
+  testutils.pollEnd(co2)
 end
 
 local function testRemoveClient()
-  -- TODO
+  crypto.sleep(0.1)
+
+  local client = luadtp.client()
+  assert(not client:connected())
+  local co = client:connect(testutils.host, testutils.portRemoveClient)
+  assert(client:connected())
+  print("Client address: ", client:getAddr())
+
+  crypto.sleep(0.1)
+  testutils.pollUntilNotNilValue(co, { eventType = "disconnected" })
+  assert(not client:connected())
+  testutils.pollEnd(co)
 end
 
 local function testStopServerWhileClientConnected()
-  -- TODO
+  crypto.sleep(0.1)
+
+  local client = luadtp.client()
+  assert(not client:connected())
+  local co = client:connect(testutils.host, testutils.portStopServerWhileClientConnected)
+  assert(client:connected())
+  print("Client address: ", client:getAddr())
+
+  crypto.sleep(0.1)
+  testutils.pollUntilNotNilValue(co, { eventType = "disconnected" })
+  assert(not client:connected())
+  testutils.pollEnd(co)
 end
 
 local function testClientCleanupOnGC()
-  -- TODO
+  local function inner()
+    local client = luadtp.client()
+    client:connect(testutils.host, testutils.portClientCleanupOnGC)
+    print("Client address: ", client:getAddr())
+  end
+
+  crypto.sleep(0.1)
+
+  inner()
+  collectgarbage("collect")
 end
 
 local function testServerCleanupOnGC()
-  -- TODO
+  crypto.sleep(0.1)
+
+  local client = luadtp.client()
+  local co = client:connect(testutils.host, testutils.portServerCleanupOnGC)
+  print("Client address: ", client:getAddr())
+
+  crypto.sleep(0.1)
+  testutils.pollUntilNotNilValue(co, { eventType = "disconnected" })
+  assert(not client:connected())
+  testutils.pollEnd(co)
 end
 
 local function testExample()
@@ -193,7 +258,7 @@ local function testExample()
 end
 
 local function test()
-  print("Beginning tests")
+  print("Beginning client tests")
 
   print("Testing serialize and deserialize...")
   testSerializeDeserialize()
@@ -226,7 +291,7 @@ local function test()
   print("Testing the README example...")
   testExample()
 
-  print("Completed tests")
+  print("Completed client tests")
 end
 
 test()

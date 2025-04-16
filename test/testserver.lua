@@ -102,23 +102,78 @@ local function testSendingCustomTypes()
 end
 
 local function testMultipleClients()
-  -- TODO
+  local server = luadtp.server()
+  local co = server:start(testutils.host, testutils.portMultipleClients)
+  print("Server address: ", server:getAddr())
+
+  testutils.pollUntilNotNilValue(co, { eventType = "connect", clientId = 1 })
+  testutils.pollUntilNotNilValue(co, { eventType = "connect", clientId = 2 })
+  print("Client 1 address: ", server:getClientAddr(1))
+  print("Client 2 address: ", server:getClientAddr(2))
+
+  local messageFromClient1 = testutils.pollUntilNotNil(co)
+  testutils.assertEq(messageFromClient1, { eventType = "receive", clientId = 1, data = testutils.multipleClientsMessageFromClient1 })
+  server:send(#messageFromClient1.data, messageFromClient1.clientId)
+
+  local messageFromClient2 = testutils.pollUntilNotNil(co)
+  testutils.assertEq(messageFromClient2, { eventType = "receive", clientId = 2, data = testutils.multipleClientsMessageFromClient2 })
+  server:send(#messageFromClient2.data, messageFromClient2.clientId)
+
+  server:send(testutils.multipleClientsMessageFromServer, 1, 2)
+
+  testutils.pollUntilNotNilValue(co, { eventType = "disconnect", clientId = 1 })
+  testutils.pollUntilNotNilValue(co, { eventType = "disconnect", clientId = 2 })
+  server:stop()
+  testutils.pollEnd(co)
 end
 
 local function testRemoveClient()
-  -- TODO
+  local server = luadtp.server()
+  local co = server:start(testutils.host, testutils.portRemoveClient)
+  print("Server address: ", server:getAddr())
+  testutils.pollUntil(co, { eventType = "connect", clientId = 1 })
+
+  server:removeClient(1)
+
+  server:stop()
+  testutils.pollEnd(co)
 end
 
 local function testStopServerWhileClientConnected()
-  -- TODO
+  local server = luadtp.server()
+  assert(not server:serving())
+  local co = server:start(testutils.host, testutils.portStopServerWhileClientConnected)
+  assert(server:serving())
+  print("Server address: ", server:getAddr())
+  testutils.pollUntil(co, { eventType = "connect", clientId = 1 })
+
+  server:stop()
+  assert(not server:serving())
+  testutils.pollUntilNotNilValue(co, { eventType = "disconnect", clientId = 1 })
+  testutils.pollEnd(co)
 end
 
 local function testClientCleanupOnGC()
-  -- TODO
+  local server = luadtp.server()
+  local co = server:start(testutils.host, testutils.portClientCleanupOnGC)
+  print("Server address: ", server:getAddr())
+  testutils.pollUntilNotNilValue(co, { eventType = "connect", clientId = 1 })
+
+  testutils.pollUntilNotNilValue(co, { eventType = "disconnect", clientId = 1 })
+  server:stop()
+  testutils.pollEnd(co)
 end
 
 local function testServerCleanupOnGC()
-  -- TODO
+  local function inner()
+    local server = luadtp.server()
+    local co = server:start(testutils.host, testutils.portServerCleanupOnGC)
+    print("Server address: ", server:getAddr())
+    testutils.pollUntilNotNilValue(co, { eventType = "connect", clientId = 1 })
+  end
+
+  inner()
+  collectgarbage("collect")
 end
 
 local function testExample()
@@ -126,7 +181,7 @@ local function testExample()
 end
 
 local function test()
-  print("Beginning tests")
+  print("Beginning server tests")
 
   print("Testing server serving...")
   testServerServing()
@@ -153,7 +208,7 @@ local function test()
   print("Testing the README example...")
   testExample()
 
-  print("Completed tests")
+  print("Completed server tests")
 end
 
 test()
