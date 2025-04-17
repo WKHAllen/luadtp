@@ -177,7 +177,29 @@ local function testServerCleanupOnGC()
 end
 
 local function testExample()
-  -- TODO
+  -- Create a server that receives strings and returns the length of each string
+  local server = luadtp.server()
+  local co = server:start(testutils.host, testutils.portExample)
+
+  -- Iterate over events
+  while true do
+    local success, event = coroutine.resume(co)
+    if not success then break end
+
+    if event ~= nil then
+      if event.eventType == "connect" then
+        print("Client with ID " .. event.clientId .. " connected")
+      elseif event.eventType == "disconnect" then
+        print("Client with ID " .. event.clientId .. " disconnected")
+        break
+      elseif event.eventType == "receive" then
+        -- Send back the length of the string
+        server:send(#event.data, event.clientId)
+      end
+    end
+  end
+
+  server:stop()
 end
 
 local function test()

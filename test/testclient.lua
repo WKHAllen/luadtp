@@ -254,7 +254,30 @@ local function testServerCleanupOnGC()
 end
 
 local function testExample()
-  -- TODO
+  -- Create a client that sends a message to the server and receives the length of the message
+  local client = luadtp.client()
+  local co = client:connect(testutils.host, testutils.portExample)
+
+  -- Send a message to the server
+  local message = "Hello, server!"
+  client:send(message)
+
+  -- Receive the response
+  local success, event = coroutine.resume(co)
+  while success and event == nil do success, event = coroutine.resume(co) end
+
+  if not success then
+    error("server closed unexpectedly")
+  elseif event.eventType == "receive" then
+    -- Validate the response
+    print("Received response from server: " .. event.data)
+    assert(event.data == #message)
+  else
+    -- Unexpected response
+    error("expected to receive a response from the server, instead got an event of type " .. event.eventType)
+  end
+
+  client:disconnect()
 end
 
 local function test()
