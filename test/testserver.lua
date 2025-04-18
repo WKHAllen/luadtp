@@ -1,6 +1,7 @@
 local luadtp = require("luadtp")
 local testutils = require("test.testutils")
 
+---Tests that the server is able to start and serve clients.
 local function testServerServing()
   local server = luadtp.server()
   assert(not server:serving())
@@ -17,6 +18,7 @@ local function testServerServing()
   testutils.pollEnd(co)
 end
 
+---Tests that the client is able to connect to the server.
 local function testClientConnect()
   local server = luadtp.server()
   local co = server:start(testutils.host, testutils.portClientConnecting)
@@ -29,6 +31,7 @@ local function testClientConnect()
   testutils.pollEnd(co)
 end
 
+---Tests data sending capabilities.
 local function testSend()
   local server = luadtp.server()
   local co = server:start(testutils.host, testutils.portSend)
@@ -43,6 +46,7 @@ local function testSend()
   testutils.pollEnd(co)
 end
 
+---Tests sending large messages over the network.
 local function testLargeSend()
   testutils.randomSeed(testutils.portLargeSend)
   local messageFromServer = testutils.randomBytes(math.random(512, 1023))
@@ -63,6 +67,7 @@ local function testLargeSend()
   testutils.pollEnd(co)
 end
 
+---Tests sending lots of messages over the network.
 local function testSendingNumerousMessages()
   testutils.randomSeed(testutils.portSendingNumerousMessages)
   local messagesFromServer = testutils.randomNumbers(math.random(64, 127), 0, 65535)
@@ -87,6 +92,7 @@ local function testSendingNumerousMessages()
   testutils.pollEnd(co)
 end
 
+---Tests sending more complex data structures over the network.
 local function testSendingCustomTypes()
   local server = luadtp.server()
   local co = server:start(testutils.host, testutils.portSendingCustomTypes)
@@ -101,6 +107,7 @@ local function testSendingCustomTypes()
   testutils.pollEnd(co)
 end
 
+---Tests having multiple clients connected to the server at once.
 local function testMultipleClients()
   local server = luadtp.server()
   local co = server:start(testutils.host, testutils.portMultipleClients)
@@ -127,6 +134,7 @@ local function testMultipleClients()
   testutils.pollEnd(co)
 end
 
+---Tests explicitly disconnecting a client from the server.
 local function testRemoveClient()
   local server = luadtp.server()
   local co = server:start(testutils.host, testutils.portRemoveClient)
@@ -139,6 +147,7 @@ local function testRemoveClient()
   testutils.pollEnd(co)
 end
 
+---Tests stopping the server while a client is still connected.
 local function testStopServerWhileClientConnected()
   local server = luadtp.server()
   assert(not server:serving())
@@ -153,6 +162,7 @@ local function testStopServerWhileClientConnected()
   testutils.pollEnd(co)
 end
 
+---Tests that all client network resources are correctly cleaned up when the client's memory is deallocated.
 local function testClientCleanupOnGC()
   local server = luadtp.server()
   local co = server:start(testutils.host, testutils.portClientCleanupOnGC)
@@ -164,6 +174,7 @@ local function testClientCleanupOnGC()
   testutils.pollEnd(co)
 end
 
+---Tests that all server network resources are correctly cleaned up when the server's memory is deallocated.
 local function testServerCleanupOnGC()
   local function inner()
     local server = luadtp.server()
@@ -176,6 +187,7 @@ local function testServerCleanupOnGC()
   collectgarbage("collect")
 end
 
+---Tests the README example.
 local function testExample()
   -- Create a server that receives strings and returns the length of each string
   local server = luadtp.server()
@@ -202,6 +214,7 @@ local function testExample()
   server:stop()
 end
 
+---Runs all server tests.
 local function test()
   print("Beginning server tests")
 

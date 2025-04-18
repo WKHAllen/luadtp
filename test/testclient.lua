@@ -1,8 +1,11 @@
 local luadtp = require("luadtp")
+---@module "src.crypto"
 local crypto = require("luadtp.crypto")
+---@module "src.util"
 local util = require("luadtp.util")
 local testutils = require("test.testutils")
 
+---Tests serialization and deserialization functions.
 local function testSerializeDeserialize()
   local value = { id = 1, bar = "baz" }
   local valueSerialized = util.serialize(value)
@@ -16,6 +19,7 @@ local function testSerializeDeserialize()
   testutils.assertEq(value, valueDeserialized)
 end
 
+---Tests message size encoding.
 local function testEncodeMessageSize()
   testutils.assertEq(util.encodeMessageSize(0), string.char(0, 0, 0, 0, 0))
   testutils.assertEq(util.encodeMessageSize(1), string.char(0, 0, 0, 0, 1))
@@ -28,6 +32,7 @@ local function testEncodeMessageSize()
   testutils.assertEq(util.encodeMessageSize(1099511627775), string.char(255, 255, 255, 255, 255))
 end
 
+---Tests message size decoding.
 local function testDecodeMessageSize()
   testutils.assertEq(util.decodeMessageSize(string.char(0, 0, 0, 0, 0)), 0)
   testutils.assertEq(util.decodeMessageSize(string.char(0, 0, 0, 0, 1)), 1)
@@ -40,6 +45,7 @@ local function testDecodeMessageSize()
   testutils.assertEq(util.decodeMessageSize(string.char(255, 255, 255, 255, 255)), 1099511627775)
 end
 
+---Tests cryptographic functions.
 local function testCrypto()
   local rsaMessage = "Hello, RSA!"
   local publicKey, privateKey = crypto.newRsaKeyPair()
@@ -69,6 +75,7 @@ local function testCrypto()
   testutils.assertNe(key2, encryptedKey)
 end
 
+---Tests that the client is able to connect to the server.
 local function testClientConnect()
   crypto.sleep(0.1)
 
@@ -88,6 +95,7 @@ local function testClientConnect()
   testutils.pollEnd(co)
 end
 
+---Tests data sending capabilities.
 local function testSend()
   crypto.sleep(0.1)
 
@@ -104,6 +112,7 @@ local function testSend()
   testutils.pollEnd(co)
 end
 
+---Tests sending large messages over the network.
 local function testLargeSend()
   crypto.sleep(0.1)
 
@@ -126,6 +135,7 @@ local function testLargeSend()
   testutils.pollEnd(co)
 end
 
+---Tests sending lots of messages over the network.
 local function testSendingNumerousMessages()
   crypto.sleep(0.1)
 
@@ -152,6 +162,7 @@ local function testSendingNumerousMessages()
   testutils.pollEnd(co)
 end
 
+---Tests sending more complex data structures over the network.
 local function testSendingCustomTypes()
   crypto.sleep(0.1)
 
@@ -168,6 +179,7 @@ local function testSendingCustomTypes()
   testutils.pollEnd(co)
 end
 
+---Tests having multiple clients connected to the server at once.
 local function testMultipleClients()
   crypto.sleep(0.1)
 
@@ -197,6 +209,7 @@ local function testMultipleClients()
   testutils.pollEnd(co2)
 end
 
+---Tests explicitly disconnecting a client from the server.
 local function testRemoveClient()
   crypto.sleep(0.1)
 
@@ -212,6 +225,7 @@ local function testRemoveClient()
   testutils.pollEnd(co)
 end
 
+---Tests stopping the server while a client is still connected.
 local function testStopServerWhileClientConnected()
   crypto.sleep(0.1)
 
@@ -227,6 +241,7 @@ local function testStopServerWhileClientConnected()
   testutils.pollEnd(co)
 end
 
+---Tests that all client network resources are correctly cleaned up when the client's memory is deallocated.
 local function testClientCleanupOnGC()
   local function inner()
     local client = luadtp.client()
@@ -240,6 +255,7 @@ local function testClientCleanupOnGC()
   collectgarbage("collect")
 end
 
+---Tests that all server network resources are correctly cleaned up when the server's memory is deallocated.
 local function testServerCleanupOnGC()
   crypto.sleep(0.1)
 
@@ -253,6 +269,7 @@ local function testServerCleanupOnGC()
   testutils.pollEnd(co)
 end
 
+---Tests the README example.
 local function testExample()
   -- Create a client that sends a message to the server and receives the length of the message
   local client = luadtp.client()
@@ -280,6 +297,7 @@ local function testExample()
   client:disconnect()
 end
 
+---Runs all client tests.
 local function test()
   print("Beginning client tests")
 

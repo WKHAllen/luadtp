@@ -1,10 +1,27 @@
+---@module "src.util"
 local util = require("luadtp.util")
+---@module "src.crypto"
 local crypto = require("luadtp.crypto")
 local socket = require("socket")
 
+---@class ServerInner
+---@field accept function
+---@field close function
+---@field settimeout function
+---@field getsockname function
+
+---@class Server
+---@field _isServing boolean Whether the server is serving.
+---@field _sock ServerInner The underlying server socket.
+---@field _clients { [integer]: { conn: ClientInner, key: string } } The list of connected clients.
+---@field _nextClientId integer The next available client identifier.
 local Server = {}
 Server.__index = Server
 
+---Performs a cryptographic key exchange with a connecting client.
+---@param server Server The network server.
+---@param clientId integer The client's identifier.
+---@param conn ClientInner The underlying connection to the client socket.
 local function exchangeKeys(server, clientId, conn)
   local publicKey, privateKey = crypto.newRsaKeyPair()
   local publicKeySize = util.encodeMessageSize(#publicKey)
@@ -36,12 +53,18 @@ local function exchangeKeys(server, clientId, conn)
   }
 end
 
+---Returns the next available client ID.
+---@param server Server The network server.
+---@return integer # The next available client ID.
 local function newClientId(server)
   local clientId = server._nextClientId
   server._nextClientId = server._nextClientId + 1
   return clientId
 end
 
+---Performs a single polling and event-triggering cycle for a given client.
+---@param server Server The network server.
+---@param clientId integer The client's ID.
 local function serveClient(server, clientId)
   local client = server._clients[clientId]
   local size, err = client.conn:receive(util.lenSize)
@@ -64,6 +87,8 @@ local function serveClient(server, clientId)
   end
 end
 
+---Performs a single polling and event-triggering cycle for the server.
+---@param server Server The network server.
 local function serve(server)
   while server._isServing do
     local conn, err = server._sock:accept()
@@ -84,6 +109,8 @@ local function serve(server)
   end
 end
 
+---Constructs and returns a new network server.
+---@return Server
 function Server.new()
   local server = setmetatable({
     _isServing = false,
@@ -95,6 +122,10 @@ function Server.new()
   return server
 end
 
+---Starts the server listening on a given host and port.
+---@param host string The host address.
+---@param port integer The port.
+---@return thread # A coroutine that must be polled to handle server events. Note that if this is not polled, clients will not be able to connect.
 function Server:start(host, port)
   if self._isServing then
     error("server is already serving")
@@ -117,6 +148,7 @@ function Server:start(host, port)
   return co
 end
 
+---Stops the server, disconnecting all clients in the process.
 function Server:stop()
   if not self._isServing then
     error("server is not serving")
@@ -131,6 +163,10 @@ function Server:stop()
   self._sock:close()
 end
 
+---Sends data to a set of clients.
+---@param data any The data to send.
+---@param clientId integer The ID of the client to send the data to.
+---@param ... integer Additional IDs of clients to send the data to.
 function Server:send(data, clientId, ...)
   local clientIds = {...}
   table.insert(clientIds, 1, clientId)
@@ -152,6 +188,8 @@ function Server:send(data, clientId, ...)
   end
 end
 
+---Sends data to all connected clients.
+---@param data any The data to send.
 function Server:sendAll(data)
   local clientIds = {}
 
@@ -162,10 +200,15 @@ function Server:sendAll(data)
   self:send(data, table.unpack(clientIds))
 end
 
+---Is the server currently serving?
+---@return boolean
 function Server:serving()
   return self._isServing
 end
 
+---Returns the server's address.
+---@return string # The server's host address.
+---@return integer # The server's port.
 function Server:getAddr()
   if not self._isServing then
     error("server is not serving")
@@ -179,6 +222,10 @@ function Server:getAddr()
   return host, port
 end
 
+---Returns a client's address.
+---@param clientId integer The client's ID.
+---@return string # The client's host address.
+---@return integer # The client's port.
 function Server:getClientAddr(clientId)
   if not self._isServing then
     error("server is not serving")
@@ -192,6 +239,8 @@ function Server:getClientAddr(clientId)
   return host, port
 end
 
+---Disconnects a client from the server.
+---@param clientId integer # The client's ID.
 function Server:removeClient(clientId)
   if not self._isServing then
     error("server is not serving")

@@ -1,10 +1,26 @@
+---@module "src.util"
 local util = require("luadtp.util")
+---@module "src.crypto"
 local crypto = require("luadtp.crypto")
 local socket = require("socket")
 
+---@class ClientInner
+---@field send function
+---@field receive function
+---@field close function
+---@field settimeout function
+---@field getsockname function
+---@field getpeername function
+
+---@class Client
+---@field _isConnected boolean Whether the client is connected to a server.
+---@field _sock ClientInner The underlying client socket.
+---@field _key string The AES encryption key.
 local Client = {}
 Client.__index = Client
 
+---Performs a cryptographic key exchange with the server.
+---@param client Client The network client.
 local function exchangeKeys(client)
   local size, err = client._sock:receive(util.lenSize)
   if err ~= nil then
@@ -33,6 +49,8 @@ local function exchangeKeys(client)
   client._key = key
 end
 
+---Performs a single polling and event-triggering cycle.
+---@param client Client The network client.
 local function handle(client)
   while client._isConnected do
     local size, err = client._sock:receive(util.lenSize)
@@ -60,6 +78,8 @@ local function handle(client)
   end
 end
 
+---Constructs and returns a new network client.
+---@return Client
 function Client.new()
   local client = setmetatable({
     _isConnected = false,
@@ -70,6 +90,10 @@ function Client.new()
   return client
 end
 
+---Connects to a server.
+---@param host string The server host address.
+---@param port integer The server port.
+---@return thread # A coroutine that must be polled to handle client events.
 function Client:connect(host, port)
   if self._isConnected then
     error("client is already connected to a server")
@@ -93,6 +117,7 @@ function Client:connect(host, port)
   return co
 end
 
+---Disconnects from the server.
 function Client:disconnect()
   if not self._isConnected then
     error("client is not connected to a server")
@@ -102,6 +127,8 @@ function Client:disconnect()
   self._sock:close()
 end
 
+---Sends data to the server.
+---@param data any The data to send.
 function Client:send(data)
   if not self._isConnected then
     error("client is not connected to a server")
@@ -121,10 +148,15 @@ function Client:send(data)
   end
 end
 
+---Is the client currently connected to a server?
+---@return boolean
 function Client:connected()
   return self._isConnected
 end
 
+---Returns the client's address.
+---@return string # The client's host address.
+---@return integer # The client's port.
 function Client:getAddr()
   if not self._isConnected then
     error("client is not connected to a server")
@@ -138,6 +170,9 @@ function Client:getAddr()
   return host, port
 end
 
+---Returns the server's address.
+---@return string # The server's host address.
+---@return integer # The server's port.
 function Client:getServerAddr()
   if not self._isConnected then
     error("client is not connected to a server")
