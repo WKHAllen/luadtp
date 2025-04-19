@@ -18,7 +18,7 @@ Add the package as a dependency in the rockspec file:
 
 ```lua
 dependencies = {
-   "luadtp == 1.0.0"
+   "luadtp == 0.1.0"
 }
 ```
 

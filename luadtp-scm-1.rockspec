@@ -1,7 +1,8 @@
 package = "luadtp"
-version = "dev-1"
+version = "scm-1"
 source = {
-   url = "git+https://github.com/WKHAllen/luadtp.git"
+   url = "git+https://github.com/WKHAllen/luadtp.git",
+   branch = "main"
 }
 description = {
    summary = "Ergonomic networking interfaces for Lua.",
